@@ -1,2 +1,3 @@
 #!/bin/bash
-echo "(Ôo)'
+ed_smiley
+echo "\"(Ôo)'"
