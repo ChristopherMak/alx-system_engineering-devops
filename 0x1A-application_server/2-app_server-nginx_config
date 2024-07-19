@@ -1,27 +1,41 @@
-server {
-    listen 80;
-    listen [::]:80 default_server;
-    add_header X-Served-By $hostname;
-    root   /etc/nginx/html;
-    index  index.html index.htm;
-    location /redirect_me {
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+#!/usr/bin/python3
+'''A module containing functions for working with the Reddit API.
+'''
+import requests
+
+
+BASE_URL = 'https://www.reddit.com'
+'''Reddit's base API URL.
+'''
+
+
+def top_ten(subreddit):
+    '''Retrieves the title of the top ten posts from a given subreddit.
+    '''
+    api_headers = {
+        'Accept': 'application/json',
+        'User-Agent': ' '.join([
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'AppleWebKit/537.36 (KHTML, like Gecko)',
+            'Chrome/97.0.4692.71',
+            'Safari/537.36',
+            'Edg/97.0.1072.62'
+        ])
     }
-    root /var/www/html;
-
-    server_name _;
-
-    location /airbnb-onepage {
-        proxy_pass http://0.0.0.0:5000/airbnb-onepage;
-    }
-
-    location /hbnb_static {
-        alias /data/web_static/current/;
-    }
-
-    location /{
-        # First attempt to serve request as file, then
-        # as directory, then fall back to displaying a 404.
-        try_files $uri $uri/ =404;
-     }
-}
+    sort = 'top'
+    limit = 10
+    res = requests.get(
+        '{}/r/{}/.json?sort={}&limit={}'.format(
+            BASE_URL,
+            subreddit,
+            sort,
+            limit
+        ),
+        headers=api_headers,
+        allow_redirects=False
+    )
+    if res.status_code == 200:
+        for post in res.json()['data']['children'][0:10]:
+            print(post['data']['title'])
+    else:
+        print(None)
